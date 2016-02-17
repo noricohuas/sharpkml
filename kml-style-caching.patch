@@ -1,0 +1,99 @@
+Index: SharpKml.Kmz/SharpKml.Kmz.csproj
+===================================================================
+--- SharpKml.Kmz/SharpKml.Kmz.csproj	(revision 44542)
++++ SharpKml.Kmz/SharpKml.Kmz.csproj	(working copy)
+@@ -38,9 +38,8 @@
+     <AssemblyOriginatorKeyFile>../SharpKml.snk</AssemblyOriginatorKeyFile>
+   </PropertyGroup>
+   <ItemGroup>
+-    <Reference Include="Ionic.Zip.Reduced, Version=1.9.1.8, Culture=neutral, PublicKeyToken=edbe51ad942a3f5c, processorArchitecture=MSIL">
++    <Reference Include="Ionic.Zip.Reduced">
+       <HintPath>..\packages\DotNetZip.Reduced.1.9.1.8\lib\net20\Ionic.Zip.Reduced.dll</HintPath>
+-      <Private>True</Private>
+     </Reference>
+     <Reference Include="System" />
+     <Reference Include="System.XML" />
+Index: SharpKml/Engine/IKmlCache.cs
+===================================================================
+--- SharpKml/Engine/IKmlCache.cs	(nonexistent)
++++ SharpKml/Engine/IKmlCache.cs	(working copy)
+@@ -0,0 +1,11 @@
++﻿using System;
++
++namespace SharpKml.Engine
++{
++    
++
++    public interface IKmlCache : IDisposable
++    {
++        KmlFile Load(Uri uri, Func<Uri, KmlFile> loadCallback);
++    }
++}
+\ No newline at end of file
+Index: SharpKml/Engine/StyleResolver.cs
+===================================================================
+--- SharpKml/Engine/StyleResolver.cs	(revision 44542)
++++ SharpKml/Engine/StyleResolver.cs	(working copy)
+@@ -23,6 +23,7 @@
+         private IFileResolver fileResolver;
+         private int nestedDepth;
+         private int styleId;
++        private IKmlCache cache;
+ 
+         private StyleResolver(IDictionary<string, StyleSelector> map)
+         {
+@@ -65,11 +66,12 @@
+         /// <param name="resolver">
+         /// Used to resolve external files referenced by the styles.
+         /// </param>
++        /// <param name="cache">IKMLCache object to use previously loaded external files</param>
+         /// <returns>
+         /// A new <see cref="Style"/> that has been resolved.
+         /// </returns>
+         /// <exception cref="ArgumentNullException">feature/file is null.</exception>
+-        public static Style CreateResolvedStyle(Feature feature, KmlFile file, StyleState state, IFileResolver resolver)
++        public static Style CreateResolvedStyle(Feature feature, KmlFile file, StyleState state, IFileResolver resolver, IKmlCache cache = null)
+         {
+             if (feature == null)
+             {
+@@ -84,6 +86,7 @@
+             var instance = new StyleResolver(file.StyleMap);
+             instance.fileResolver = resolver;
+             instance.state = state;
++            instance.cache = cache;
+             instance.Merge(feature.StyleUrl);
+ 
+             foreach (StyleSelector selector in feature.Styles)
+@@ -312,7 +315,12 @@
+                 }
+                 else if (this.fileResolver != null)
+                 {
+-                    KmlFile file = this.LoadFile(path);
++
++                    KmlFile file;
++                    file = this.cache != null
++                        ? cache.Load(url, uri => this.LoadFile(uri.GetPath()))
++                        : this.LoadFile(path);
++
+                     if (file != null)
+                     {
+                         StyleSelector style;
+Index: SharpKml/SharpKml.Core.csproj
+===================================================================
+--- SharpKml/SharpKml.Core.csproj	(revision 44542)
++++ SharpKml/SharpKml.Core.csproj	(working copy)
+@@ -59,6 +59,7 @@
+     <Compile Include="Base\TypeBrowser.cs" />
+     <Compile Include="Base\ValueConverter.cs" />
+     <Compile Include="Base\Vector.cs" />
+     <Compile Include="Base\XmlComponent.cs" />
+     <Compile Include="Base\XmlExtractor.cs" />
+     <Compile Include="Dom\Atom\Author.cs" />
+@@ -193,6 +194,7 @@
+     <Compile Include="Engine\FeatureExtensions.cs" />
+     <Compile Include="Engine\GeometryExtensions.cs" />
+     <Compile Include="Engine\IFileResolver.cs" />
++    <Compile Include="Engine\IKmlCache.cs" />
+     <Compile Include="Engine\KmlFile.cs" />
+     <Compile Include="Engine\LinkResolver.cs" />
+     <Compile Include="Engine\StyleResolver.cs" />

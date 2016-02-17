@@ -1,0 +1,111 @@
+Index: SharpKml.Kmz/Engine/KmzFile.cs
+===================================================================
+--- SharpKml.Kmz/Engine/KmzFile.cs	(revision 44542)
++++ SharpKml.Kmz/Engine/KmzFile.cs	(working copy)
+@@ -4,6 +4,7 @@
+ using System.Linq;
+ using System.Text;
+ using Ionic.Zip;
++using SharpKml.Base;
+ 
+ namespace SharpKml.Engine
+ {
+@@ -14,7 +15,7 @@
+     /// The entire Kmz archive (in its compressed state) will be held in memory
+     /// until a call to <see cref="KmzFile.Dispose"/> is made.
+     /// </remarks>
+-    public sealed class KmzFile : IDisposable
++    public sealed class KmzFile : IKmzReader, IDisposable
+     {
+         // This is the default name for writing a KML file to a new archive,
+         // however, the default file for reading from an archive is the first
+Index: SharpKml/Base/IKmzReader.cs
+===================================================================
+--- SharpKml/Base/IKmzReader.cs	(nonexistent)
++++ SharpKml/Base/IKmzReader.cs	(working copy)
+@@ -0,0 +1,23 @@
++﻿using System;
++using SharpKml.Engine;
++
++namespace SharpKml.Base
++{
++    public interface IKmzReader
++    {
++        /// <summary>Extracts the default Kml file from the archive.</summary>
++        /// <returns>
++        /// A string containing the Kml content if a suitable file was found in
++        /// the Kmz archive; otherwise, null.
++        /// </returns>
++        /// <remarks>
++        /// This returns the first file in the Kmz archive table of contents
++        /// which has a ".kml" extension. Note that the file found may not
++        /// necessarily be in the root directory.
++        /// </remarks>
++        /// <exception cref="System.ObjectDisposedException">
++        /// <see cref="SharpKml.Engine.KmzFile.Dispose()"/> has been called on this instance.
++        /// </exception>
++        string ReadKml();
++    }
++}
+\ No newline at end of file
+Index: SharpKml/Engine/KmlFile.cs
+===================================================================
+--- SharpKml/Engine/KmlFile.cs	(revision 44542)
++++ SharpKml/Engine/KmlFile.cs	(working copy)
+@@ -119,6 +119,8 @@
+             }
+         }
+ 
++        
++
+         /// <summary>
+         /// Loads a KmlFile using the specified KML data.
+         /// </summary>
+@@ -148,7 +150,47 @@
+             file.Parse(reader);
+             return file;
+         }
++        /// <summary>
++        /// Loads a KmlFile using the specified KMZ data.
++        /// </summary>
++        /// <param name="kmz">The KmzFile containing the KML data.</param>
++        /// <returns>
++        /// A KmlFile representing the default KML file in the specified KMZ archive
++        /// or null if no KML data was found.
++        /// </returns>
++        /// <remarks>
++        /// This method checks for duplicate Id's in the file and throws an
++        /// exception if duplicate Id's are found. To enable duplicate Id's
++        /// use the <see cref="Parser"/> class and pass the root element
++        /// to <see cref="Create"/>.
++        /// </remarks>
++        /// <exception cref="ArgumentNullException">kmz is null.</exception>
++        /// <exception cref="ObjectDisposedException">
++        /// <see cref="KmzFile.Dispose"/> has been called on kmz.
++        /// </exception>
++        /// <exception cref="System.Xml.XmlException">
++        /// An error occurred while parsing the KML.
++        /// </exception>
++        public static KmlFile LoadFromKmz(IKmzReader kmz, bool namespaces = true)
++        {
++            if (kmz == null)
++            {
++                throw new ArgumentNullException("kmz");
++            }
+ 
++            string kml = kmz.ReadKml();
++            if (kml != null)
++            {
++                KmlFile instance = new KmlFile();
++                using (var stream = new StringReader(kml))
++                {
++                    instance.Parse(stream);
++                }
++                return instance;
++            }
++            return null;
++        }
++
+         /// <summary>
+         /// Searches for a <see cref="KmlObject"/> with the specified
+         /// <see cref="KmlObject.Id"/>.

@@ -1,0 +1,218 @@
+Index: SharpKml.Kmz/SharpKml.Kmz.csproj
+===================================================================
+--- SharpKml.Kmz/SharpKml.Kmz.csproj	(revision 44542)
++++ SharpKml.Kmz/SharpKml.Kmz.csproj	(working copy)
+@@ -38,9 +38,8 @@
+     <AssemblyOriginatorKeyFile>../SharpKml.snk</AssemblyOriginatorKeyFile>
+   </PropertyGroup>
+   <ItemGroup>
+-    <Reference Include="Ionic.Zip.Reduced, Version=1.9.1.8, Culture=neutral, PublicKeyToken=edbe51ad942a3f5c, processorArchitecture=MSIL">
++    <Reference Include="Ionic.Zip.Reduced">
+       <HintPath>..\packages\DotNetZip.Reduced.1.9.1.8\lib\net20\Ionic.Zip.Reduced.dll</HintPath>
+-      <Private>True</Private>
+     </Reference>
+     <Reference Include="System" />
+     <Reference Include="System.XML" />
+@@ -51,14 +50,14 @@
+     <Compile Include="Properties\AssemblyInfo.cs" />
+   </ItemGroup>
+   <ItemGroup>
++    <None Include="packages.config" />
++  </ItemGroup>
++  <ItemGroup>
+     <ProjectReference Include="..\SharpKml\SharpKml.Core.csproj">
+       <Project>{ba1c2e65-51f6-4960-bd72-26e3b95d38d6}</Project>
+       <Name>SharpKml.Core</Name>
+     </ProjectReference>
+   </ItemGroup>
+-  <ItemGroup>
+-    <None Include="packages.config" />
+-  </ItemGroup>
+   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+        Other similar extension points exist, see Microsoft.Common.targets.
+Index: SharpKml/Base/KmlNamespaces.cs
+===================================================================
+--- SharpKml/Base/KmlNamespaces.cs	(revision 44542)
++++ SharpKml/Base/KmlNamespaces.cs	(working copy)
+@@ -127,6 +127,9 @@
+         /// <summary>Represents the default XML Schema prefix.</summary>
+         public const string XsiPrefix = "xsi";
+ 
++        public const string SharpKmlPrefix = "sharpkml";
++        public const string SharpKmlNamespace = "http://sharpkml.codeplex.com";
++
+         private static readonly Dictionary<string, string> Namespaces = GenerateNamespaces();
+ 
+         /// <summary>Searches for the associated XML namespace for the specified prefix.</summary>
+Index: SharpKml/Dom/Features/Data.cs
+===================================================================
+--- SharpKml/Dom/Features/Data.cs	(revision 44542)
++++ SharpKml/Dom/Features/Data.cs	(working copy)
+@@ -30,4 +30,22 @@
+         [KmlElement("value", 2)]
+         public string Value { get; set; }
+     }
++    [KmlElement(KmlNamespaces.SharpKmlPrefix + ":HiddenData", KmlNamespaces.SharpKmlNamespace)]
++    public sealed class HiddenData : KmlObject
++    {
++        /// <summary>Gets or sets an alternate display name.</summary>
++        [KmlElement("displayName", 1)]
++        public string DisplayName { get; set; }
++
++        /// <summary>Gets or sets the name of the data pair.</summary>
++        /// <remarks>
++        /// The value shall be unique within the context of its <see cref="Element.Parent"/>.
++        /// </remarks>
++        [KmlAttribute("name")]
++        public string Name { get; set; }
++
++        /// <summary>Gets or sets the value of the data pair.</summary>
++        [KmlElement("value", 2)]
++        public string Value { get; set; }
++    }
+ }
+Index: SharpKml/Dom/Features/ExtendedData.cs
+===================================================================
+--- SharpKml/Dom/Features/ExtendedData.cs	(revision 44542)
++++ SharpKml/Dom/Features/ExtendedData.cs	(working copy)
+@@ -25,6 +25,8 @@
+         {
+             this.RegisterValidChild<Data>();
+             this.RegisterValidChild<SchemaData>();
++            this.RegisterValidChild<HiddenData>();
++            this.Namespaces.AddNamespace("sharpkml", "http://sharpkml.codeplex.com");
+         }
+ 
+         /// <summary>
+@@ -43,6 +45,12 @@
+             get { return this.Children.OfType<SchemaData>(); }
+         }
+ 
++        public IEnumerable<HiddenData> HiddenData
++        {
++            get { return this.Children.OfType<HiddenData>(); }
++        }
++
++
+         /// <summary>
+         /// Adds the specified <see cref="Data"/> to this instance.
+         /// </summary>
+@@ -56,17 +64,22 @@
+             this.AddChild(data);
+         }
+ 
+-        /// <summary>
+-        /// Adds the specified <see cref="SchemaData"/> to this instance.
+-        /// </summary>
+-        /// <param name="data">The <c>SchemaData</c> to add to this instance.</param>
+-        /// <exception cref="System.ArgumentNullException">data is null.</exception>
+-        /// <exception cref="System.InvalidOperationException">
+-        /// data belongs to another <see cref="Element"/>.
+-        /// </exception>
+-        public void AddSchemaData(SchemaData data)
++        public void AddHiddenData(HiddenData data)
+         {
+             this.AddChild(data);
+         }
++
++    /// <summary>
++    /// Adds the specified <see cref="SchemaData"/> to this instance.
++    /// </summary>
++    /// <param name="data">The <c>SchemaData</c> to add to this instance.</param>
++    /// <exception cref="System.ArgumentNullException">data is null.</exception>
++    /// <exception cref="System.InvalidOperationException">
++    /// data belongs to another <see cref="Element"/>.
++    /// </exception>
++    public void AddSchemaData(SchemaData data)
++        {
++            this.AddChild(data);
++        }
+     }
+ }
+Index: SharpKml/SharpKml.Core.csproj
+===================================================================
+--- SharpKml/SharpKml.Core.csproj	(revision 44542)
++++ SharpKml/SharpKml.Core.csproj	(working copy)
+@@ -59,6 +59,7 @@
+     <Compile Include="Base\TypeBrowser.cs" />
+     <Compile Include="Base\ValueConverter.cs" />
+     <Compile Include="Base\Vector.cs" />
++    <Compile Include="Base\WebUtility.cs" />
+     <Compile Include="Base\XmlComponent.cs" />
+     <Compile Include="Base\XmlExtractor.cs" />
+     <Compile Include="Dom\Atom\Author.cs" />
+@@ -193,6 +194,7 @@
+     <Compile Include="Engine\FeatureExtensions.cs" />
+     <Compile Include="Engine\GeometryExtensions.cs" />
+     <Compile Include="Engine\IFileResolver.cs" />
++    <Compile Include="Engine\IKmlCache.cs" />
+     <Compile Include="Engine\KmlFile.cs" />
+     <Compile Include="Engine\LinkResolver.cs" />
+     <Compile Include="Engine\StyleResolver.cs" />
+Index: UnitTests/Engine/HiddenDataTests.cs
+===================================================================
+--- UnitTests/Engine/HiddenDataTests.cs	(nonexistent)
++++ UnitTests/Engine/HiddenDataTests.cs	(working copy)
+@@ -0,0 +1,49 @@
++﻿using System;
++using System.IO;
++using System.Linq;
++using NUnit.Framework;
++using SharpKml.Dom;
++using SharpKml.Engine;
++
++namespace NUintTests.Engine
++{
++    [TestFixture]
++    public class ExtendedDataTest
++    {
++        [Test]
++        public void CanSaveAndRestoreHiddenData()
++        {
++            var placemark = new Placemark { Name = "TestPlacemark" };
++
++            placemark.ExtendedData = new ExtendedData();
++            placemark.ExtendedData.AddHiddenData(new HiddenData { Name = "HIDDEN_KEY", Value = "A VALUE" });
++
++            var buffer = new byte[2048];
++            using (var ms = new MemoryStream(buffer))
++            {
++                KmlFile.Create(placemark, false).Save(ms);
++                ms.Flush();
++
++                using (var reader = new StreamReader(new MemoryStream(buffer)))
++                {
++                    Console.WriteLine(reader.ReadToEnd());
++                }
++
++                using (var ms2 = new MemoryStream(buffer))
++                {
++                    var kmlFile = KmlFile.Load(ms2);
++
++                    Assert.That(kmlFile.Root, Is.InstanceOf<Placemark>());
++                    var placemarkCopy = kmlFile.Root as Placemark;
++
++                    Assert.That(placemarkCopy.ExtendedData.HiddenData.Any(), Is.True);
++
++                    var hidden = placemarkCopy.ExtendedData.HiddenData.First(h => h.Name == "HIDDEN_KEY");
++
++                    Assert.That(hidden, Is.Not.Null);
++                }
++
++            }
++        }
++    }
++}
+Index: UnitTests/UnitTests.csproj
+===================================================================
+--- UnitTests/UnitTests.csproj	(revision 44542)
++++ UnitTests/UnitTests.csproj	(working copy)
+@@ -74,6 +74,7 @@
+     <Compile Include="Engine\ElementExtensionsTest.cs" />
+     <Compile Include="Engine\EntityMapperTest.cs" />
+     <Compile Include="Engine\FeatureExtensionsTest.cs" />
++    <Compile Include="Engine\HiddenDataTests.cs" />
+     <Compile Include="Engine\KmlFileTest.cs" />
+     <Compile Include="Engine\KmzFileTest.cs" />
+     <Compile Include="Engine\LinkResolverTest.cs" />

@@ -1,0 +1,49 @@
+Index: SharpKml/Base/KmlFormatter.cs
+===================================================================
+--- SharpKml/Base/KmlFormatter.cs	(revision 44542)
++++ SharpKml/Base/KmlFormatter.cs	(working copy)
+@@ -9,6 +9,7 @@
+     internal class KmlFormatter : ICustomFormatter, IFormatProvider
+     {
+         private static readonly KmlFormatter SingleInstance = new KmlFormatter();
++        private object _formatLock;
+ 
+         private KmlFormatter()
+         {
+@@ -43,22 +44,25 @@
+         {
+             if (format == null)
+             {
+-                var convertible = arg as IConvertible;
+-                if (convertible != null)
++                lock (_formatLock)
+                 {
+-                    switch (convertible.GetTypeCode())
++                    var convertible = arg as IConvertible;
++                    if (convertible != null)
+                     {
+-                        case TypeCode.Boolean:
+-                            return GetBool((bool)arg);
++                        switch (convertible.GetTypeCode())
++                        {
++                            case TypeCode.Boolean:
++                                return GetBool((bool) arg);
+ 
+-                        case TypeCode.DateTime:
+-                            return GetDateTime((DateTime)arg);
++                            case TypeCode.DateTime:
++                                return GetDateTime((DateTime) arg);
+ 
+-                        case TypeCode.Double:
+-                            return GetFloatingPoint((double)arg);
++                            case TypeCode.Double:
++                                return GetFloatingPoint((double) arg);
+ 
+-                        case TypeCode.Single:
+-                            return GetFloatingPoint((float)arg);
++                            case TypeCode.Single:
++                                return GetFloatingPoint((float) arg);
++                        }
+                     }
+                 }
+             }

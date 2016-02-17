@@ -1,0 +1,42 @@
+Index: SharpKml/Dom/Geometries/IGeometryCollection.cs
+===================================================================
+--- SharpKml/Dom/Geometries/IGeometryCollection.cs	(nonexistent)
++++ SharpKml/Dom/Geometries/IGeometryCollection.cs	(working copy)
+@@ -0,0 +1,12 @@
++﻿using System;
++using System.Collections.Generic;
++using System.Linq;
++using System.Text;
++
++namespace SharpKml.Dom
++{
++	public interface IGeometryCollection
++	{
++		IEnumerable<Geometry> Geometry { get; }
++	}
++}
+Index: SharpKml/Dom/Geometries/MultipleGeometry.cs
+===================================================================
+--- SharpKml/Dom/Geometries/MultipleGeometry.cs	(revision 44542)
++++ SharpKml/Dom/Geometries/MultipleGeometry.cs	(working copy)
+@@ -10,7 +10,7 @@
+     /// </summary>
+     /// <remarks>OGC KML 2.2 Section 10.2</remarks>
+     [KmlElement("MultiGeometry")]
+-    public sealed class MultipleGeometry : Geometry
++    public sealed class MultipleGeometry : Geometry, IGeometryCollection
+     {
+         /// <summary>
+         /// Initializes a new instance of the <see cref="MultipleGeometry"/> class.
+Index: UnitTests/UnitTests.csproj
+===================================================================
+--- UnitTests/UnitTests.csproj	(revision 44542)
++++ UnitTests/UnitTests.csproj	(working copy)
+@@ -74,6 +74,7 @@
+     <Compile Include="Engine\ElementExtensionsTest.cs" />
+     <Compile Include="Engine\EntityMapperTest.cs" />
+     <Compile Include="Engine\FeatureExtensionsTest.cs" />
++    <Compile Include="Engine\HiddenDataTests.cs" />
+     <Compile Include="Engine\KmlFileTest.cs" />
+     <Compile Include="Engine\KmzFileTest.cs" />
+     <Compile Include="Engine\LinkResolverTest.cs" />
