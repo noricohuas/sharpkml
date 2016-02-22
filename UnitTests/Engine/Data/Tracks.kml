@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <Style id="geoffrey_entity_kmlstyle_entity_kmlstyle">
+      <IconStyle>
+        <Icon>
+          <href>Images\1333190799877592338512270205166104258486.png</href>
+        </Icon>
+      </IconStyle>
+      <LineStyle>
+        <color>00000000</color>
+        <width>0</width>
+      </LineStyle>
+    </Style>
+    <Placemark id="geoffrey">
+      <name>geoffrey</name>
+      <description>
+        Track Data
+      </description>
+      <styleUrl>#geoffrey_entity_kmlstyle_entity_kmlstyle</styleUrl>
+      <ExtendedData xmlns:sharpkml="http://sharpkml.codeplex.com">
+        <sharpkml:HiddenData name="Replay-RingtailDesign.Replay.KmlPlugin.Converters.AttachmentList">
+          <value><![CDATA[{"Attachments":[]}]]></value>
+        </sharpkml:HiddenData>
+      </ExtendedData>
+      <Track xmlns="http://www.google.com/kml/ext/2.2">
+        <when xmlns="http://www.opengis.net/kml/2.2">2014-01-01T18:00:00Z</when>
+        <when xmlns="http://www.opengis.net/kml/2.2">2014-01-01T18:00:05Z</when>
+        <when xmlns="http://www.opengis.net/kml/2.2">2014-01-01T18:00:10Z</when>
+        <when xmlns="http://www.opengis.net/kml/2.2">2014-01-01T18:00:15Z</when>
+        <when xmlns="http://www.opengis.net/kml/2.2">2014-01-01T18:00:20Z</when>
+        <when xmlns="http://www.opengis.net/kml/2.2">2014-01-01T18:00:25Z</when>
+        <when xmlns="http://www.opengis.net/kml/2.2">2014-01-01T18:00:30Z</when>
+        <when xmlns="http://www.opengis.net/kml/2.2">2014-01-01T18:00:35Z</when>
+        <when xmlns="http://www.opengis.net/kml/2.2">2014-01-01T18:00:40Z</when>
+        <when xmlns="http://www.opengis.net/kml/2.2">2014-01-01T18:00:45Z</when>
+        <gx:coord xmlns:gx="http://www.google.com/kml/ext/2.2">-97.803700000000006 30.447711000000002 0</gx:coord>
+        <gx:coord xmlns:gx="http://www.google.com/kml/ext/2.2">-97.803700000000006 30.456704216059197 0</gx:coord>
+        <gx:coord xmlns:gx="http://www.google.com/kml/ext/2.2">-97.803700000000006 30.465697432118372 0</gx:coord>
+        <gx:coord xmlns:gx="http://www.google.com/kml/ext/2.2">-97.803700000000006 30.474690648177567 0</gx:coord>
+        <gx:coord xmlns:gx="http://www.google.com/kml/ext/2.2">-97.803700000000006 30.483683864236749 0</gx:coord>
+        <gx:coord xmlns:gx="http://www.google.com/kml/ext/2.2">-97.803700000000006 30.492677080295937 0</gx:coord>
+        <gx:coord xmlns:gx="http://www.google.com/kml/ext/2.2">-97.803700000000006 30.501670296355126 0</gx:coord>
+        <gx:coord xmlns:gx="http://www.google.com/kml/ext/2.2">-97.803700000000006 30.510663512414322 0</gx:coord>
+        <gx:coord xmlns:gx="http://www.google.com/kml/ext/2.2">-97.803700000000006 30.519656728473503 0</gx:coord>
+        <gx:coord xmlns:gx="http://www.google.com/kml/ext/2.2">-97.803700000000006 30.528649944532692 0</gx:coord>
+      </Track>
+    </Placemark>
+  </Document>
+</kml>
