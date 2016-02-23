@@ -165,7 +165,13 @@
                         where element.Item1.Equals(xml)
                         select element.Item2;
 
-            return query.FirstOrDefault();
+            var propInfo = query.FirstOrDefault();
+            // try looking without the namespace
+            if (propInfo == null)
+            {
+                propInfo = this.elements.Where(e => e.Item1.Name == xml.Name).Select(e => e.Item2).FirstOrDefault();
+            }
+            return propInfo;
         }
 
         private static T GetAttribute<T>(MemberInfo provider)

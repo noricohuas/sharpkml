@@ -48,6 +48,7 @@
         {
             this.defaultNamespace = null; // This method is strict about namespaces
             XmlReader reader = XmlReader.Create(input);
+            
             this.Parse(reader);
         }
 

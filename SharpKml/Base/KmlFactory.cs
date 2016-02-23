@@ -12,6 +12,7 @@
     {
         // We need two so we can do reverse lookups
         private static readonly Dictionary<XmlComponent, Type> Types = new Dictionary<XmlComponent, Type>();
+        private static readonly Dictionary<string, Type> Kml22ElementTypes = new Dictionary<string, Type>();
         private static readonly Dictionary<Type, XmlComponent> Names = new Dictionary<Type, XmlComponent>();
 
         /// <summary>
@@ -44,6 +45,11 @@
         {
             Type type;
             if (Types.TryGetValue(xml, out type))
+            {
+                return (Element)Activator.CreateInstance(type);
+            }
+            //check and see if the namespace is wrong but is in the 2.2 
+            if (Kml22ElementTypes.TryGetValue(xml.Name, out type))
             {
                 return (Element)Activator.CreateInstance(type);
             }
@@ -126,9 +132,15 @@
                     {
                         var xml = new XmlComponent(null, element.ElementName, element.Namespace);
                         RegisterType(xml, type);
+                        if (element.Namespace == KmlNamespaces.Kml22Namespace)
+                        {
+                            Kml22ElementTypes[element.ElementName] = type;
+                        }
                     }
                 }
             }
         }
     }
+
+    
 }

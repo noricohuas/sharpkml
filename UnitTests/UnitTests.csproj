@@ -36,7 +36,7 @@
     <StartupObject />
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>../SharpKml.snk</AssemblyOriginatorKeyFile>
@@ -78,7 +78,9 @@
     <Compile Include="Engine\KmlFileTest.cs" />
     <Compile Include="Engine\KmzFileTest.cs" />
     <Compile Include="Engine\LinkResolverTest.cs" />
+    <Compile Include="Engine\NamespaceToleranceTests.cs" />
     <Compile Include="Engine\StyleResolverTest.cs" />
+    <Compile Include="Engine\TrackKmlTests.cs" />
     <Compile Include="Engine\UpdateExtensionsTest.cs" />
     <Compile Include="Engine\UriExtensionsTest.cs" />
     <Compile Include="PartialTrustTest.cs" />
@@ -131,6 +133,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Engine\Data\Tracks.kml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Engine\Data\OverlayBadNamespace.kml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
