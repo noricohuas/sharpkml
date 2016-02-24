@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Project DefaultTargets="BuildDebug"
+		 xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	  
+	<PropertyGroup>
+		<Major>2</Major>
+		<Minor>1</Minor>
+		<Build_Number>1</Build_Number>
+		<NugetHome>$(MSBuildProjectDirectory)\.nuget</NugetHome>
+	</PropertyGroup>
+
+	
+
+
+	<Target Name="Clean">
+		<ItemGroup>
+			<DllFiles Include="*.dll"/>
+			<ExeFiles Include="*.exe"/>
+			<NupkgFiles Include="LE_SharpKML*.nupkg"/>
+		</ItemGroup>
+		<Delete Files="@(DllFiles)"/>
+		<Delete Files="@(ExeFiles)"/>
+		<Delete Files="@(NupkgFiles)"/>
+		<RemoveDir Directories="Bin;obj" />
+	</Target>
+
+	<Target Name="BuildDebug" DependsOnTargets="Clean">
+		<MSBuild Projects="SharpKml.sln"
+				 Properties="Configuration=Debug;Platform=Any CPU;DefineConstants=DEBUG;TRACE;$(DefineConstants)"
+				 Targets="Rebuild"
+				 />
+	</Target>
+
+	<Target Name="BuildRelease" DependsOnTargets="Clean">
+		<MSBuild Projects="SharpKml.sln"
+				 Properties="Configuration=Release;Platform=Any CPU;DefineConstants=$(DefineConstants)"
+				 Targets="Rebuild"
+				 />
+		<Exec Command="&quot;$(NugetHome)\NuGet.exe&quot; pack &quot;$(MSBuildProjectDirectory)\LE_SharpKml.nuspec&quot; -NoPackageAnalysis -Version $(Major).$(Minor).$(Build_Number) -BasePath  $(MSBuildProjectDirectory)\SharpKml.Kmz\bin\Release\ -OutputDirectory $(MSBuildProjectDirectory)\"/>
+	</Target>
+
+</Project>

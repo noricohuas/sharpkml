@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <metadata>
+        <id>LE_SharpKML</id>
+        <version>2.1.0</version>
+        <title>Live Earth Customized SharpKML</title>
+        <authors>cptyler</authors>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>Live Earth Customized SharpKML</description>
+        <summary>Live Earth Customized SharpKML</summary>
+    </metadata>
+    <files>
+        <file src="SharpKml.dll" target="lib\SharpKml.dll" />
+        <file src="SharpKml.Kmz.dll" target="lib\SharpKml.Kmz.dll" />
+        <file src="SharpKml.Kmz.pdb" target="lib\SharpKml.Kmz.pdb" />
+        <file src="SharpKml.Kmz.xml" target="lib\SharpKml.Kmz.xml" />
+        <file src="SharpKml.pdb" target="lib\SharpKml.pdb" />
+        <file src="SharpKml.xml" target="lib\SharpKml.xml" />
+    </files>
+</package>
