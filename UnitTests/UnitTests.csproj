@@ -123,6 +123,9 @@
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\SharpKml.Kmz\SharpKml.Kmz.csproj">
       <Project>{029079b8-013e-4422-ab56-6ca90ca9f20e}</Project>
       <Name>SharpKml.Kmz</Name>
