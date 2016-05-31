@@ -78,10 +78,17 @@
         [KmlElement("altitudeMode", KmlNamespaces.GX22Namespace, 5)]
         public GX.AltitudeMode? GXAltitudeMode { get; set; }
 
-        /// <summary>
-        /// Gets the coordinates of the bounds of this instance.
+		/// <summary>
+		/// Gets or sets the order for drawing multiple polygons.
+		/// [Google Extension]
+		/// </summary>
+		[KmlElement("drawOrder", KmlNamespaces.GX22Namespace, 6)]
+		public int? GXDrawOrder { get; set; }
+
+		/// <summary>
+		/// Gets the coordinates of the bounds of this instance.
         /// </summary>
-        IEnumerable<Vector> IBoundsInformation.Coordinates
+		IEnumerable<Vector> IBoundsInformation.Coordinates
         {
             get
             {
