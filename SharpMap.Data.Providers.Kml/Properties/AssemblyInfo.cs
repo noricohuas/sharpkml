@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // Attribute gesteuert. Ändern Sie diese Attributwerte, um die Informationen zu ändern,
 // die mit einer Assembly verknüpft sind.
 [assembly: AssemblyTitle("SharpMap.Data.Providers.Kml")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("kml parser")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("CNL-Software")]
 [assembly: AssemblyProduct("SharpMap.Data.Providers.Kml")]
