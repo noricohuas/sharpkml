@@ -13,13 +13,5 @@
     <description>$description$</description>
     <copyright>Copyright 2016</copyright>
     <tags>Huitian</tags>
-    <dependencies>
-      <dependency id="Huitian.SharpMap" version="1.2.0" />
-      <dependency id="Huitian.SharpKml" version="2.1.0" />
-      <dependency id="Huitian.SharpKml.Kmz" version="2.1.0" />
-      <dependency id="GeoAPI" version="1.7.4.0" />
-      <dependency id="NetTopologySuite" version="1.14.0.0" />
-      <dependency id="Huitian.ProjNet" version="1.3.2" />
-    </dependencies>
   </metadata>
 </package>

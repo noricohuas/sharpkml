@@ -308,7 +308,9 @@ namespace SharpMap.Data.Providers
                         }
                         else
                         {
-                            var newSymbol = GetImageFromUrl(style.Icon.Icon.Href);
+                            Image newSymbol = null;
+                            newSymbol = Properties.Resources.red_pushpin;
+                            //newSymbol = GetImageFromUrl(style.Icon.Icon.Href);                            
                             symbolDict.Add(style.Icon.Icon.Href.ToString(), newSymbol);
                             vectorStyle.Symbol = newSymbol;
                         }

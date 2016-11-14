@@ -54,10 +54,6 @@
       <HintPath>..\packages\PowerCollections.1.0.5731.25243\lib\net20\PowerCollections.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="SharpKml, Version=3.0.0.0, Culture=neutral, PublicKeyToken=9bb853c026a5c0ac, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpKml.Core.3.0.0\lib\portable45-net45+win8+wpa81\SharpKml.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="SharpMap, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Huitian.SharpMap.1.2.0\lib\net45\SharpMap.dll</HintPath>
       <Private>True</Private>
@@ -79,6 +75,14 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\SharpKml.Kmz\SharpKml.Kmz.csproj">
+      <Project>{029079b8-013e-4422-ab56-6ca90ca9f20e}</Project>
+      <Name>SharpKml.Kmz</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SharpKml\SharpKml.Core.csproj">
+      <Project>{ba1c2e65-51f6-4960-bd72-26e3b95d38d6}</Project>
+      <Name>SharpKml.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SharpMap.Data.Providers.Kml\SharpMap.Data.Providers.Kml.csproj">
       <Project>{f9da6934-413f-4744-84ce-923d901f60e6}</Project>
       <Name>SharpMap.Data.Providers.Kml</Name>

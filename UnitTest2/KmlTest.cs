@@ -34,7 +34,7 @@ namespace UnitTests
             DateTime dt1 = DateTime.Now;
             GeoAPI.GeometryServiceProvider.Instance = NetTopologySuite.NtsGeometryServices.Instance;
             //var kml = KmlProvider.FromKml("/WorkSpace/huas/Polygontwo_LayerToKML.kml");
-            var kml = KmlProvider.FromKml("/WorkSpace/huas/2010上海50KM毅行.kml");
+            var kml = KmlProvider.FromKml(@"C:\Workspace\huas\2010上海50KM毅行.kml");
             DateTime dt2 = DateTime.Now;
             Assert.IsNotNull(kml);
             Assert.AreNotEqual(kml.GetFeatureCount(), 0);
@@ -45,6 +45,20 @@ namespace UnitTests
             TimeSpan span2 = dt3 - dt1;
             Console.WriteLine($"dt2 - dt1:{span1.Seconds},dt3 - dt1:{span2.Seconds}");
 
+        }
+
+        [Test]
+        public void KmzFileTest()
+        {
+            GeoAPI.GeometryServiceProvider.Instance = NetTopologySuite.NtsGeometryServices.Instance;
+            GeoAPI.GeometryServiceProvider.Instance = NetTopologySuite.NtsGeometryServices.Instance;
+            HttpWebRequest req = (HttpWebRequest)WebRequest.Create(new Uri("http://112.74.67.213:6080/huayu/TestData/raw/master/snotelwithlabels.kmz"));
+            HttpWebResponse resp = (HttpWebResponse)req.GetResponse();
+            var kml = KmlProvider.FromKmz(resp.GetResponseStream());
+            Assert.IsNotNull(kml);
+            Assert.AreNotEqual(kml.GetFeatureCount(), 0);
+            Console.WriteLine(string.Format("kml.GetFeatureCount():{0}", kml.GetFeatureCount()));
+            Console.WriteLine(string.Format("kml.GetExtents():{0}", kml.GetExtents()));
         }
 
     }
