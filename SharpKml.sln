@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.40629.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Examples", "Examples\Examples.csproj", "{823EA980-0DE9-4A92-A001-C9179833127B}"
 EndProject
@@ -14,6 +14,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{32B001
 	ProjectSection(SolutionItems) = preProject
 		.nuget\packages.config = .nuget\packages.config
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpMap.Data.Providers.Kml", "SharpMap.Data.Providers.Kml\SharpMap.Data.Providers.Kml.csproj", "{F9DA6934-413F-4744-84CE-923D901F60E6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTest2", "UnitTest2\UnitTest2.csproj", "{07DD3AAB-7983-4CB2-B2E0-9B44725EDBBD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,6 +41,14 @@ Global
 		{029079B8-013E-4422-AB56-6CA90CA9F20E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{029079B8-013E-4422-AB56-6CA90CA9F20E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{029079B8-013E-4422-AB56-6CA90CA9F20E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F9DA6934-413F-4744-84CE-923D901F60E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9DA6934-413F-4744-84CE-923D901F60E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9DA6934-413F-4744-84CE-923D901F60E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9DA6934-413F-4744-84CE-923D901F60E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07DD3AAB-7983-4CB2-B2E0-9B44725EDBBD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07DD3AAB-7983-4CB2-B2E0-9B44725EDBBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07DD3AAB-7983-4CB2-B2E0-9B44725EDBBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07DD3AAB-7983-4CB2-B2E0-9B44725EDBBD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
