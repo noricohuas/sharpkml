@@ -609,6 +609,17 @@ namespace SharpMap.Data.Providers
             return res;
         }
 
+        public List<string> GetObjectIDsInViewForSList(Envelope bbox)
+        {
+            var box = _geometryFactory.ToGeometry(bbox);
+            var res = new List<string>();
+            _geometrys.Where(x => box.Intersects(_geometryFactory.BuildGeometry(x.Value))).ToList().ForEach(x =>
+            {
+                res.Add(x.Key.Id);
+            });
+            return res;
+        }
+
         /// <summary>
         /// Returns the geometry corresponding to the Object ID
         /// </summary>
@@ -695,6 +706,21 @@ namespace SharpMap.Data.Providers
                 res.ItemArray = GetAssetProperties(tmp.Key);
                 res.Geometry = _geometryFactory.BuildGeometry(tmp.Value);
                 res.AcceptChanges();
+                return res;
+            }
+            return null;
+        }
+
+        public FeatureDataRow GetFeature(string oid)
+        {
+            var tmp = _geometrys.FirstOrDefault(x => x.Key.Id == oid);
+
+            if (tmp.Value != null)
+            {
+                var res = (FeatureDataRow)_schemaTable.NewRow();
+                res.ItemArray = GetAssetProperties(tmp.Key);
+                res.Geometry = _geometryFactory.BuildGeometry(tmp.Value);
+                //res.AcceptChanges();
                 return res;
             }
             return null;
