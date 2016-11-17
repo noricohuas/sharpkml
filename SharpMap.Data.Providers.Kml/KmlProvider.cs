@@ -60,7 +60,9 @@ namespace SharpMap.Data.Providers
 
             using (var s = File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-                return FromKml(s);
+                var kml = FromKml(s);
+                kml.InitIdsForNull();
+                return kml;
             }
         }
 
@@ -74,7 +76,9 @@ namespace SharpMap.Data.Providers
             if (stream == null)
                 throw new ArgumentNullException("stream");
 
-            return new KmlProvider(KmlFile.Load(stream));
+            var kml = new KmlProvider(KmlFile.Load(stream));
+            kml.InitIdsForNull();
+            return kml;
         }
 
         /// <summary>
@@ -94,7 +98,9 @@ namespace SharpMap.Data.Providers
             
             using (var s = File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-                return FromKmz(s, internalFile);
+                var kml = FromKmz(s, internalFile);
+                kml.InitIdsForNull();
+                return kml;
             }
         }
 
@@ -113,7 +119,9 @@ namespace SharpMap.Data.Providers
             //NOTE:DON'T KNOW IF THIS IS CORRECT!
             using (var ms = new MemoryStream(kmz.ReadFile(internalFile)))
             {
-                return new KmlProvider(KmlFile.Load(ms));
+                var kml = new KmlProvider(KmlFile.Load(ms));
+                kml.InitIdsForNull();
+                return kml;
             }
         }
         #endregion
@@ -705,7 +713,7 @@ namespace SharpMap.Data.Providers
                 var res = (FeatureDataRow) _schemaTable.NewRow();
                 res.ItemArray = GetAssetProperties(tmp.Key);
                 res.Geometry = _geometryFactory.BuildGeometry(tmp.Value);
-                res.AcceptChanges();
+                //res.AcceptChanges();
                 return res;
             }
             return null;
@@ -736,6 +744,123 @@ namespace SharpMap.Data.Providers
 
             _geometrys.Values.ToList().ForEach(x => x.ForEach(v => retEnv.ExpandToInclude(v.EnvelopeInternal)));
             return retEnv;
+        }
+
+        public Document GetRoot()
+        {
+            if (_geometrys.Keys.Count > 0)
+            {
+                var place = _geometrys.Keys.ToArray()[0];
+                if (place.Parent != null)
+                {
+                    var f = (Folder)place.Parent;
+                    return GetRoot(f);
+                }
+            }
+
+            return null;
+        }
+
+        private Document GetRoot(Folder f)
+        {
+            Document result = null;
+            bool conti = true;
+            while (conti)
+            {
+                if (f != null && f.Parent != null && f.Parent is Folder)
+                {
+                    f = (Folder) f.Parent;
+                }else if (f != null && f.Parent != null && f.Parent is Document)
+                {
+                    result = (Document)f.Parent;
+                }
+
+                if (f == null || f.Parent == null || f.Parent is Document) conti = false;
+            }
+
+            return result;
+        }
+
+        private Dictionary<string,string> _placeMarkGeometryTypeDic = new Dictionary<string, string>();
+
+        public string GetGeometryType(string id)
+        {
+            if (_placeMarkGeometryTypeDic.ContainsKey(id))
+            {
+                string outstring;
+                _placeMarkGeometryTypeDic.TryGetValue(id, out outstring);
+                return outstring;
+            }
+            return "unkown";
+        }
+
+        protected void InitIdsForNull()
+        {
+            int count = 1;
+            var root = GetRoot();
+            if (root != null)
+            {
+                root.Id = count++.ToString();
+
+                _geometrys.Keys.ToList().ForEach(x =>
+                {
+                    x.Id = count++.ToString();
+                    if (x.Parent is Folder) (x.Parent as Folder).Id = count++.ToString();
+                });
+
+                _geometrys.ToList().ForEach(x =>
+                {
+                    if (x.Value?.Count > 0)
+                    {
+                        var first = x.Value.ToArray()[0];
+                        _placeMarkGeometryTypeDic.Add(x.Key.Id, GetEsriGeometryType(first?.GeometryType));
+                    }
+
+                });
+            }
+        }
+
+        private string GetEsriGeometryType(string geometryType)
+        {
+            string GeometryType = "esriGeometryUnkown";
+            switch (geometryType)
+            {
+                case "Point":
+                    GeometryType = "esriGeometryPoint";
+                    break;
+                case "MultiPoint":
+                    GeometryType = "esriGeometryMultipoint";
+                    break;
+                case "LineString":
+                case "MultiLineString":
+                    GeometryType = "esriGeometryPolyline";
+                    break;
+                case "Polygon":
+                case "MultiPolygon":
+                    GeometryType = "esriGeometryPolygon";
+                    break;
+                default:
+                    GeometryType = "esriGeometryUnkown";
+                    break;
+            }
+
+            return GeometryType;
+        }
+
+        public List<Folder> GetFolders()
+        {
+            var result = new List<Folder>();
+            Dictionary<string,string> dic = new Dictionary<string, string>();
+            _geometrys.Keys.ToList().ForEach(x =>
+            {
+                if (!dic.ContainsKey(x.Id) && x.Parent is Folder)
+                {
+                    result.Add(x.Parent as Folder);
+                    dic.Add(x.Id, x.Id);
+                }
+            });
+
+            return result;
         }
 
         /// <summary>

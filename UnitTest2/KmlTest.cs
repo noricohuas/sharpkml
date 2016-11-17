@@ -9,8 +9,10 @@ using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using NetTopologySuite.Geometries;
 using NUnit.Framework;
+using SharpKml.Dom;
 using SharpMap.Data;
 using SharpMap.Data.Providers;
+using TimeSpan = System.TimeSpan;
 
 namespace UnitTests
 {
@@ -110,17 +112,7 @@ namespace UnitTests
             Assert.IsInstanceOf(typeof(GeometryCollection), dr.Geometry);
             GeometryCollection gc = (GeometryCollection)dr.Geometry;
             Assert.AreEqual(gc.NumGeometries, 6);
-            Func<List<Coordinate>, string> gwl = (list) =>
-            {
-                var result = "";
-                foreach (var item in list)
-                {
-                    result += $"{item.X},{item.Y}  ";
-                }
-
-                return result;
-
-            };
+            
 
             for (int i = 0; i < gc.NumGeometries; i++)
             {
@@ -135,6 +127,18 @@ namespace UnitTests
 
 
         }
+
+       private Func<List<Coordinate>, string> gwl = (list) =>
+        {
+            var result = "";
+            foreach (var item in list)
+            {
+                result += $"{item.X},{item.Y}  ";
+            }
+
+            return result;
+
+        };
 
         [Test]
         public void KmlFileTest()
@@ -152,7 +156,64 @@ namespace UnitTests
             TimeSpan span1 = dt2 - dt1;
             TimeSpan span2 = dt3 - dt1;
             Console.WriteLine($"dt2 - dt1:{span1.Seconds},dt3 - dt1:{span2.Seconds}");
+            List<string> ids = kml.GetObjectIDsInViewForSList(kml.GetExtents());
+            int polylineCount = 0;
+            int pointCount = 0;
+            foreach (var id in ids)
+            {
+                var dr = kml.GetFeature(id);
+                var place = (Placemark)dr.ItemArray[2];
+                if (dr.Geometry.GeometryType.Equals("MultiLineString") || dr.Geometry.GeometryType.Equals("LineString"))
+                {
+                    polylineCount++;
+                   
+                    Console.WriteLine($"LineString:{place.Id},{place.Name}" );
+                }
+                if (dr.Geometry.GeometryType.Equals("Point") || dr.Geometry.GeometryType.Equals("MultiPoint"))
+                {
+                    pointCount++;
+                    Console.WriteLine($"Point:{place.Id},{place.Name}");
+                }
 
+             
+             
+                //Console.WriteLine(gwl(dr.Geometry.Coordinates.ToList()));
+                //Console.WriteLine("------------------------------------------------------");
+            }
+
+            kml.GetFolders().ForEach(folder =>
+            {
+                Console.WriteLine($"folder:{folder.Id},{folder.Name},{folder.Features.Count()}");
+            });
+
+            Assert.AreEqual(polylineCount,3);
+            Console.WriteLine($"polylineCount:{polylineCount}");
+            Assert.AreEqual(pointCount, 24);
+            Console.WriteLine($"pointCount:{pointCount}");
+
+        }
+
+        [Test]
+        public void KmlFileTest2()
+        {
+            GeoAPI.GeometryServiceProvider.Instance = NetTopologySuite.NtsGeometryServices.Instance;
+            var kml = KmlProvider.FromKml(@"C:\Workspace\huas\2010上海50KM毅行.kml");
+            Assert.IsNotNull(kml);
+            var folder =  kml.GetRoot();
+            Assert.IsNotNull(folder);
+            Assert.AreEqual(folder.Name, "2010上海50KM毅行");
+            var dr = kml.GetFeature("5");
+            var style = kml.GetKmlStyle(dr);
+            Assert.IsNotNull(style);
+
+
+
+
+        }
+
+        [Test]
+        public void KmlFileTest3()
+        {
         }
 
         [Test]
