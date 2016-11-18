@@ -12,7 +12,9 @@ using NUnit.Framework;
 using SharpKml.Dom;
 using SharpMap.Data;
 using SharpMap.Data.Providers;
+using SharpMap.Styles;
 using TimeSpan = System.TimeSpan;
+using System.Drawing;
 
 namespace UnitTests
 {
@@ -167,7 +169,7 @@ namespace UnitTests
                 {
                     polylineCount++;
                    
-                    Console.WriteLine($"LineString:{place.Id},{place.Name}" );
+                    Console.WriteLine($"LineString:{place.Id},{place.Name},{kml.GetGeometryType(place.Id)}" );
                 }
                 if (dr.Geometry.GeometryType.Equals("Point") || dr.Geometry.GeometryType.Equals("MultiPoint"))
                 {
@@ -186,6 +188,7 @@ namespace UnitTests
                 Console.WriteLine($"folder:{folder.Id},{folder.Name},{folder.Features.Count()}");
             });
 
+            Assert.AreEqual(kml.GetFolders().Count, 6);
             Assert.AreEqual(polylineCount,3);
             Console.WriteLine($"polylineCount:{polylineCount}");
             Assert.AreEqual(pointCount, 24);
@@ -198,22 +201,122 @@ namespace UnitTests
         {
             GeoAPI.GeometryServiceProvider.Instance = NetTopologySuite.NtsGeometryServices.Instance;
             var kml = KmlProvider.FromKml(@"C:\Workspace\huas\2010上海50KM毅行.kml");
+            //var kml = KmlProvider.FromKmz(@"C:\Workspace\huas\test2_MapToKML.kmz");
+            //var kml = KmlProvider.FromKmz(@"C:\Workspace\huas\Polygontwo_LayerToKML.kmz");
             Assert.IsNotNull(kml);
             var folder =  kml.GetRoot();
-            Assert.IsNotNull(folder);
-            Assert.AreEqual(folder.Name, "2010上海50KM毅行");
-            var dr = kml.GetFeature("5");
-            var style = kml.GetKmlStyle(dr);
-            Assert.IsNotNull(style);
+            Dictionary<string, TypeAndStyle> dic = new Dictionary<string, TypeAndStyle>();
+            kml.GetObjectIDsInViewForSList(kml.GetExtents()).ForEach(x =>
+            {
+                var dr = kml.GetFeature(x);
+                var style = kml.GetKmlStyle(dr);
+                var styleid = (string) dr["StyleUrl"];
+                var place = (Placemark)dr.ItemArray[2];
+                //Console.WriteLine($"styleid:{styleid},{place.StyleUrl.ToString()}");
+                if (style != null && !string.IsNullOrEmpty(styleid) && !dic.ContainsKey(styleid))
+                {
+                    dic.Add(styleid, new TypeAndStyle(kml.GetGeometryType(place?.Id), style));
+                }
+            });
 
-
+            Console.WriteLine($"styleCount:{dic.Count}");
+            dic.ToList().ForEach(x =>
+            {
+                VectorStyle style = x.Value.Style;
+                Console.WriteLine($"styleid:{x.Key},type:{x.Value.Type}");
+                if (x.Value.Type.Equals("esriGeometryPolygon"))
+                {
+                    var fill = (SolidBrush)style.Fill;
+                    var outline = style.Outline;
+                    Console.WriteLine($"color:{fill.Color.R},{fill.Color.G},{fill.Color.B},{fill.Color.A},  " +
+                                      $"outline:{outline.Color.R},{outline.Color.G},{outline.Color.B},{outline.Color.A}, width:{outline.Width}");
+                }else if (x.Value.Type.Equals("esriGeometryPolyline"))
+                {
+                    var line = style.Line;
+                    Console.WriteLine($"linecolor:{line.Color.R},{line.Color.G},{line.Color.B},{line.Color.A}, width:{line.Width}, offset:{style.LineOffset}");
+                }
+                else if (x.Value.Type.Equals("esriGeometryPoint"))
+                {
+                    var url = kml.GetIconUrl(x.Key);
+                    Console.WriteLine($"url:{url}");
+                    if (!string.IsNullOrEmpty(url) && !url.Contains("http"))
+                    {
+                        var image = kml.GetImageFromKmz(url);
+                        if (image != null)
+                        {
+                            Console.WriteLine($"image height:{image.Height} width:{image.Width} ");
+                        }
+                    }
+                }
+            });
 
 
         }
 
+        public class TypeAndStyle
+        {
+            public string Type { get; set; }
+            public VectorStyle Style { get; set; }
+            public TypeAndStyle(string type, VectorStyle v)
+            {
+                Type = type;
+                Style = v;
+            }
+        }
+
+
         [Test]
         public void KmlFileTest3()
         {
+            GeoAPI.GeometryServiceProvider.Instance = NetTopologySuite.NtsGeometryServices.Instance;
+            //var kml = KmlProvider.FromKml(@"C:\Workspace\huas\2010上海50KM毅行.kml");
+            var kml = KmlProvider.FromKmz(@"C:\Workspace\huas\test2_MapToKML.kmz");
+            //var kml = KmlProvider.FromKmz(@"C:\Workspace\huas\Polygontwo_LayerToKML.kmz");
+            Assert.IsNotNull(kml);
+
+            List<string> ids = kml.GetObjectIDsInViewForSList(kml.GetExtents());
+            int polylineCount = 0;
+            int pointCount = 0;
+            int polygoncount = 0;
+            int styleCount = 0;
+            foreach (var id in ids)
+            {
+                var dr = kml.GetFeature(id);
+                var style = kml.GetKmlStyle(dr);
+                Console.WriteLine($"styleid:{(string)dr["StyleUrl"]},");
+                var place = (Placemark)dr.ItemArray[2];
+                if (style != null)
+                {
+                    styleCount++;
+                }
+                if (dr.Geometry.GeometryType.Equals("MultiLineString") || dr.Geometry.GeometryType.Equals("LineString"))
+                {
+                    polylineCount++;
+
+                    Console.WriteLine($"LineString:{place.Id},{place.Name},{kml.GetGeometryType(place.Id)}");
+                }
+                if (dr.Geometry.GeometryType.Equals("Point") || dr.Geometry.GeometryType.Equals("MultiPoint"))
+                {
+                    pointCount++;
+                    Console.WriteLine($"Point:{place.Id},{place.Name},{kml.GetGeometryType(place.Id)}");
+                }
+
+                if (dr.Geometry.GeometryType.Equals("Polygon") || dr.Geometry.GeometryType.Equals("MultiPolygon") || dr.Geometry.GeometryType.Equals("GeometryCollection"))
+                {
+                    polygoncount++;
+                    Console.WriteLine($"Point:{place.Id},{place.Name},{kml.GetGeometryType(place.Id)}");
+                }
+
+            }
+
+            Console.WriteLine($"pointCount:{pointCount},polylineCount:{polylineCount},polygoncount:{polygoncount},");
+            Console.WriteLine($"ids:{ids.Count},styleCount:{styleCount}");
+
+            kml.GetFolders().ForEach(folder =>
+            {
+                Console.WriteLine($"folder:{folder.Id},{folder.Name},{folder.Features.Count()}");
+            });
+
         }
 
         [Test]

@@ -43,7 +43,8 @@ namespace SharpMap.Data.Providers
     public class KmlProvider : IProvider
     {
         #region Static factory methods
-        
+
+        public KmzFile kmzFile;
         /// <summary>
         /// Creates a KmlProvider from a file
         /// </summary>
@@ -61,7 +62,7 @@ namespace SharpMap.Data.Providers
             using (var s = File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 var kml = FromKml(s);
-                kml.InitIdsForNull();
+                kml.InitIds();
                 return kml;
             }
         }
@@ -77,7 +78,7 @@ namespace SharpMap.Data.Providers
                 throw new ArgumentNullException("stream");
 
             var kml = new KmlProvider(KmlFile.Load(stream));
-            kml.InitIdsForNull();
+            kml.InitIds();
             return kml;
         }
 
@@ -99,7 +100,7 @@ namespace SharpMap.Data.Providers
             using (var s = File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 var kml = FromKmz(s, internalFile);
-                kml.InitIdsForNull();
+                kml.InitIds();
                 return kml;
             }
         }
@@ -114,13 +115,18 @@ namespace SharpMap.Data.Providers
         {
             var kmz = KmzFile.Open(stream);
             if (string.IsNullOrEmpty(internalFile))
-                return new KmlProvider(kmz.GetDefaultKmlFile());
-
+            {
+                var kml = new KmlProvider(kmz.GetDefaultKmlFile());
+                kml.kmzFile = kmz;
+                kml.InitIds();
+                return kml;
+            }
+        
             //NOTE:DON'T KNOW IF THIS IS CORRECT!
             using (var ms = new MemoryStream(kmz.ReadFile(internalFile)))
             {
                 var kml = new KmlProvider(KmlFile.Load(ms));
-                kml.InitIdsForNull();
+                kml.InitIds();
                 return kml;
             }
         }
@@ -177,6 +183,7 @@ namespace SharpMap.Data.Providers
         {
             ParseKml(kmlFile);
         }
+
 
         /// <summary>
         /// Method to parse the KmlFile
@@ -316,11 +323,12 @@ namespace SharpMap.Data.Providers
                         }
                         else
                         {
-                            Image newSymbol = null;
-                            newSymbol = Properties.Resources.red_pushpin;
-                            //newSymbol = GetImageFromUrl(style.Icon.Icon.Href);                            
-                            symbolDict.Add(style.Icon.Icon.Href.ToString(), newSymbol);
-                            vectorStyle.Symbol = newSymbol;
+                            //Image newSymbol = Properties.Resources.red_pushpin;
+                            ////Image newSymbol = GetImageFromUrl(style.Icon.Icon.Href);                            
+                            //symbolDict.Add(style.Icon.Icon.Href.ToString(), newSymbol);
+                            //vectorStyle.Symbol = newSymbol;
+
+                            SetIconUrl(style.Id, style.Icon.Icon.Href.ToString());
                         }
 
                         vectorStyle.SymbolScale = 1f;
@@ -343,6 +351,38 @@ namespace SharpMap.Data.Providers
             }
         }
 
+        Dictionary<string, string> _IconUrlDic = new Dictionary<string, string>();
+
+        private void SetIconUrl(string styleID, string url)
+        {
+            if (!_IconUrlDic.ContainsKey(styleID))
+            {
+                _IconUrlDic.Add(styleID, url);
+            }
+        }
+
+        public string GetIconUrl(string styleID)
+        {
+            string result = string.Empty;
+            if (_IconUrlDic.ContainsKey(styleID))
+            {
+                _IconUrlDic.TryGetValue(styleID, out result);
+            }
+
+            if (string.IsNullOrEmpty(result))
+            {
+                foreach (var stl in _styleMaps)
+                {
+                    if (stl.Id == styleID)
+                    {
+                        _IconUrlDic.TryGetValue(stl.NormalStyleUrl, out result);
+                        return result;
+                    }
+                }
+            }
+            return result;
+        }
+
         public VectorStyle GetKmlStyle(FeatureDataRow row)
         {
             //get styleID from row
@@ -363,13 +403,15 @@ namespace SharpMap.Data.Providers
                 }
             }
 
-            if (row.Geometry.OgcGeometryType == OgcGeometryType.Point ||
-                row.Geometry.OgcGeometryType == OgcGeometryType.MultiPoint)
-            {
-                return DefaultPointStyle();
-            }
+            //if (row.Geometry.OgcGeometryType == OgcGeometryType.Point ||
+            //    row.Geometry.OgcGeometryType == OgcGeometryType.MultiPoint)
+            //{
+            //    return DefaultPointStyle();
+            //}
 
-            return DefaultVectorStyle();
+            //return DefaultVectorStyle();
+
+            return null;
 
 
         }
@@ -785,16 +827,15 @@ namespace SharpMap.Data.Providers
 
         public string GetGeometryType(string id)
         {
+            string result = "unkown";
             if (_placeMarkGeometryTypeDic.ContainsKey(id))
             {
-                string outstring;
-                _placeMarkGeometryTypeDic.TryGetValue(id, out outstring);
-                return outstring;
+                _placeMarkGeometryTypeDic.TryGetValue(id, out result);
             }
-            return "unkown";
+            return result;
         }
 
-        protected void InitIdsForNull()
+        protected void InitIds()
         {
             int count = 1;
             var root = GetRoot();
@@ -802,18 +843,30 @@ namespace SharpMap.Data.Providers
             {
                 root.Id = count++.ToString();
 
+                Dictionary<string,string> dic = new Dictionary<string, string>();
                 _geometrys.Keys.ToList().ForEach(x =>
                 {
+                    if (x.Parent is Folder)
+                    {
+                        if ((x.Parent as Folder).Id == null) (x.Parent as Folder).Id = count++.ToString();
+                        if (!dic.ContainsKey((x.Parent as Folder).Id))
+                        {
+                            (x.Parent as Folder).Id = count++.ToString();
+                            dic.Add((x.Parent as Folder).Id, (x.Parent as Folder).Id);
+                        }
+                        
+                    }
                     x.Id = count++.ToString();
-                    if (x.Parent is Folder) (x.Parent as Folder).Id = count++.ToString();
                 });
 
+                
                 _geometrys.ToList().ForEach(x =>
                 {
                     if (x.Value?.Count > 0)
                     {
                         var first = x.Value.ToArray()[0];
-                        _placeMarkGeometryTypeDic.Add(x.Key.Id, GetEsriGeometryType(first?.GeometryType));
+                        if (!_placeMarkGeometryTypeDic.ContainsKey(x.Key.Id))
+                            _placeMarkGeometryTypeDic.Add(x.Key.Id, GetEsriGeometryType(first?.GeometryType));
                     }
 
                 });
@@ -837,6 +890,7 @@ namespace SharpMap.Data.Providers
                     break;
                 case "Polygon":
                 case "MultiPolygon":
+                case "GeometryCollection":
                     GeometryType = "esriGeometryPolygon";
                     break;
                 default:
@@ -847,16 +901,28 @@ namespace SharpMap.Data.Providers
             return GeometryType;
         }
 
+        public Image GetImageFromKmz(String fileName)
+        {
+            if (kmzFile != null)
+            {
+               byte[] bytes = kmzFile.ReadFile(fileName);
+                MemoryStream ms = new MemoryStream(bytes);
+                Image image = Image.FromStream(ms);
+                return image;
+            }
+            return Properties.Resources.red_pushpin;
+        }
+
         public List<Folder> GetFolders()
         {
             var result = new List<Folder>();
             Dictionary<string,string> dic = new Dictionary<string, string>();
             _geometrys.Keys.ToList().ForEach(x =>
             {
-                if (!dic.ContainsKey(x.Id) && x.Parent is Folder)
+                if (x.Parent is Folder &&!dic.ContainsKey((x.Parent as Folder).Id))
                 {
                     result.Add(x.Parent as Folder);
-                    dic.Add(x.Id, x.Id);
+                    dic.Add((x.Parent as Folder).Id, (x.Parent as Folder).Id);
                 }
             });
 
