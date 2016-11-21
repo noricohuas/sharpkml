@@ -15,6 +15,7 @@ using SharpMap.Data.Providers;
 using SharpMap.Styles;
 using TimeSpan = System.TimeSpan;
 using System.Drawing;
+using System.IO;
 
 namespace UnitTests
 {
@@ -148,7 +149,8 @@ namespace UnitTests
             DateTime dt1 = DateTime.Now;
             GeoAPI.GeometryServiceProvider.Instance = NetTopologySuite.NtsGeometryServices.Instance;
             //var kml = KmlProvider.FromKml("/WorkSpace/huas/Polygontwo_LayerToKML.kml");
-            var kml = KmlProvider.FromKml(@"C:\Workspace\huas\2010上海50KM毅行.kml");
+            //var kml = KmlProvider.FromKml(@"C:\Workspace\huas\2010上海50KM毅行.kml");
+           var kml = KmlProvider.FromKmz(@"C:\Workspace\huas\snotelwithlabels.kmz");
             DateTime dt2 = DateTime.Now;
             Assert.IsNotNull(kml);
             Assert.AreNotEqual(kml.GetFeatureCount(), 0);
@@ -188,10 +190,10 @@ namespace UnitTests
                 Console.WriteLine($"folder:{folder.Id},{folder.Name},{folder.Features.Count()}");
             });
 
-            Assert.AreEqual(kml.GetFolders().Count, 6);
-            Assert.AreEqual(polylineCount,3);
+            //Assert.AreEqual(kml.GetFolders().Count, 6);
+            //Assert.AreEqual(polylineCount,3);
             Console.WriteLine($"polylineCount:{polylineCount}");
-            Assert.AreEqual(pointCount, 24);
+            //Assert.AreEqual(pointCount, 24);
             Console.WriteLine($"pointCount:{pointCount}");
 
         }
@@ -200,6 +202,7 @@ namespace UnitTests
         public void KmlFileTest2()
         {
             GeoAPI.GeometryServiceProvider.Instance = NetTopologySuite.NtsGeometryServices.Instance;
+            //var kml = KmlProvider.FromKmz(@"C:\Workspace\huas\snotelwithlabels.kmz");
             var kml = KmlProvider.FromKml(@"C:\Workspace\huas\2010上海50KM毅行.kml");
             //var kml = KmlProvider.FromKmz(@"C:\Workspace\huas\test2_MapToKML.kmz");
             //var kml = KmlProvider.FromKmz(@"C:\Workspace\huas\Polygontwo_LayerToKML.kmz");
@@ -270,8 +273,9 @@ namespace UnitTests
         {
             GeoAPI.GeometryServiceProvider.Instance = NetTopologySuite.NtsGeometryServices.Instance;
             //var kml = KmlProvider.FromKml(@"C:\Workspace\huas\2010上海50KM毅行.kml");
-            var kml = KmlProvider.FromKmz(@"C:\Workspace\huas\test2_MapToKML.kmz");
+            //var kml = KmlProvider.FromKmz(@"C:\Workspace\huas\test2_MapToKML.kmz");
             //var kml = KmlProvider.FromKmz(@"C:\Workspace\huas\Polygontwo_LayerToKML.kmz");
+            var kml = KmlProvider.FromKmz(GetStreamFromUrl(new Uri("http://112.74.67.213:6080/huayu/TestData/raw/master/online/Polygontwo_LayerToKML.kmz")));
             Assert.IsNotNull(kml);
 
             List<string> ids = kml.GetObjectIDsInViewForSList(kml.GetExtents());
@@ -317,6 +321,22 @@ namespace UnitTests
                 Console.WriteLine($"folder:{folder.Id},{folder.Name},{folder.Features.Count()}");
             });
 
+        }
+
+        [Test]
+        public void KmlFileTest4()
+        {
+            var kml = KmlProvider.FromKml(GetStreamFromUrl(new Uri("http://112.74.67.213:6080/huayu/TestData/raw/master/online/googletest.kml")));
+            Assert.IsNotNull(kml);
+        }
+
+        public static Stream GetStreamFromUrl(Uri url)
+        {
+            GeoAPI.GeometryServiceProvider.Instance = NetTopologySuite.NtsGeometryServices.Instance;
+            GeoAPI.GeometryServiceProvider.Instance = NetTopologySuite.NtsGeometryServices.Instance;
+            HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
+            HttpWebResponse resp = (HttpWebResponse)req.GetResponse();
+            return resp.GetResponseStream();
         }
 
         [Test]

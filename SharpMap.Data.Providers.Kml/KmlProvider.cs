@@ -455,32 +455,59 @@ namespace SharpMap.Data.Providers
         public void ExtractGeometries(Element kml)
         {
             _geometrys = new Dictionary<Placemark, List<IGeometry>>();
+            int count = 0;
 
             //todo handle other geom types
+            foreach (var f in kml.Flatten().OfType<MultipleGeometry>())
+            {
+                f.Id = $"_Geometry_1ids1_{count++}";
+                if (!IsProcessed(f))
+                    ProcessMuiltipleGeometry(f);
+            }
+
             foreach (var f in kml.Flatten().OfType<Polygon>())
             {
-                ProcessPolygonGeometry(f);
+                f.Id = $"_Geometry_1ids1_{count++}";
+                if (!IsProcessed(f))
+                    ProcessPolygonGeometry(f);
             }
+
+            //foreach (var f in kml.Flatten().OfType<LinearRing>())
+            //{
+            //    f.Id = $"_Geometry_1ids1_{count++}";
+            //    if (!IsProcessed(f))
+            //        ProcessLinearRingGeometry(f);
+            //}
 
             foreach (var f in kml.Flatten().OfType<LineString>())
             {
-                ProcessLineStringGeometry(f);
+                f.Id = $"_Geometry_1ids1_{count++}";
+                if (!IsProcessed(f))
+                    ProcessLineStringGeometry(f);
             }
 
             foreach (var f in kml.Flatten().OfType<Point>())
             {
-                ProcessPointGeometry(f);
+                f.Id = $"_Geometry_1ids1_{count++}";
+                if (!IsProcessed(f))
+                    ProcessPointGeometry(f);
             }
 
-            foreach (var f in kml.Flatten().OfType<LinearRing>())
-            {
-                ProcessLinearRingGeometry(f);
-            }
+        }
 
-            foreach (var f in kml.Flatten().OfType<MultipleGeometry>())
+        private bool IsProcessed(Geometry e)
+        {
+            if (e == null) return false;
+            if (string.IsNullOrEmpty(e.Id) && e.Id.Contains("_Geometry_1ids1_"))
+                return true;
+            while (true)
             {
-                ProcessMuiltipleGeometry(f);
+                if (!(e.Parent is Geometry)) break;
+                Geometry e2 = e.Parent as Geometry;;
+                if (!string.IsNullOrEmpty(e2.Id) && e2.Id.Contains("_Geometry_1ids1_"))
+                    return true;
             }
+            return false;
         }
 
         private void ProcessMuiltipleGeometry(MultipleGeometry f)
@@ -648,13 +675,9 @@ namespace SharpMap.Data.Providers
         {
             var box = _geometryFactory.ToGeometry(bbox);
             var res = new Collection<uint>();
-
-            uint id = 0;
-            
             _geometrys.Where(x => box.Intersects(_geometryFactory.BuildGeometry(x.Value))).ToList().ForEach(x =>
             {
-                res.Add(id);
-                id++;
+                res.Add(Convert.ToUInt32(x.Key.Id));
             });
             return res;
         }
@@ -795,10 +818,16 @@ namespace SharpMap.Data.Providers
                 var place = _geometrys.Keys.ToArray()[0];
                 if (place.Parent != null)
                 {
-                    var f = (Folder)place.Parent;
-                    return GetRoot(f);
+                    if (place.Parent is Document) return place.Parent as Document;
+                    if (place.Parent is Folder)
+                    {
+                        var f = (Folder)place.Parent;
+                        return GetRoot(f);
+                    }
+                   
                 }
             }
+            
 
             return null;
         }
@@ -927,6 +956,11 @@ namespace SharpMap.Data.Providers
             });
 
             return result;
+        }
+
+        public Dictionary<Placemark, List<IGeometry>> GetAllGeometrys()
+        {
+            return _geometrys;
         }
 
         /// <summary>

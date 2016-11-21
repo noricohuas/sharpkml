@@ -124,7 +124,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SharpKml.Kmz\SharpKml.Kmz.csproj">
-      <Project>{029079b8-013e-4422-ab56-6ca90ca9f20e}</Project>
+      <Project>{c493a4f1-def9-49a0-bd0e-294863c5f777}</Project>
       <Name>SharpKml.Kmz</Name>
     </ProjectReference>
     <ProjectReference Include="..\SharpKml\SharpKml.Core.csproj">
