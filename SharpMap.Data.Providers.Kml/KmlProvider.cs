@@ -62,7 +62,7 @@ namespace SharpMap.Data.Providers
             using (var s = File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 var kml = FromKml(s);
-                kml.InitIds();
+                //kml.InitIds();
                 return kml;
             }
         }
@@ -78,7 +78,7 @@ namespace SharpMap.Data.Providers
                 throw new ArgumentNullException("stream");
 
             var kml = new KmlProvider(KmlFile.Load(stream));
-            kml.InitIds();
+            //kml.InitIds();
             return kml;
         }
 
@@ -100,7 +100,7 @@ namespace SharpMap.Data.Providers
             using (var s = File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 var kml = FromKmz(s, internalFile);
-                kml.InitIds();
+                //kml.InitIds();
                 return kml;
             }
         }
@@ -118,7 +118,7 @@ namespace SharpMap.Data.Providers
             {
                 var kml = new KmlProvider(kmz.GetDefaultKmlFile());
                 kml.kmzFile = kmz;
-                kml.InitIds();
+                //kml.InitIds();
                 return kml;
             }
         
@@ -126,7 +126,7 @@ namespace SharpMap.Data.Providers
             using (var ms = new MemoryStream(kmz.ReadFile(internalFile)))
             {
                 var kml = new KmlProvider(KmlFile.Load(ms));
-                kml.InitIds();
+                //kml.InitIds();
                 return kml;
             }
         }
