@@ -3,16 +3,17 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 
 [assembly: AssemblyTitle("SharpKml")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("SharpKml Core")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("SharpKml")]
-[assembly: AssemblyCopyright("Copyright © 2013")]
+[assembly: AssemblyCompany("CNL-Software")]
+[assembly: AssemblyProduct("SharpMap.Data.Providers.Kml")]
+[assembly: AssemblyCopyright("Copyright © CNL-Software 2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
-[assembly: AssemblyVersion("2.1.0.0")]
-[assembly: AssemblyFileVersion("2.1.0.0")]
+
+[assembly: AssemblyVersion("2.1.1.0")]
+[assembly: AssemblyFileVersion("2.1.1.0")]
 [assembly: CLSCompliant(true)]
 
 [assembly: InternalsVisibleTo("SharpKml.Kmz")]
